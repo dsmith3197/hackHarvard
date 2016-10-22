@@ -27,10 +27,18 @@ class SampleListener(Leap.Listener):
             yRadius = 100
             pyautogui.moveTo((hand_center.x + xRadius) * screenWidth / (2 * xRadius), screenHeight - (hand_center.y - yRadius) * screenHeight / (2 * yRadius))
 
+            
             #checking for clicking if all fingers are extended
             fingers = hand.fingers
-            if (len(fingers) == 5):
+            
+            extendedCounter = 0
+            for x in fingers:
+                if x.extended:
+                    extendedCounter++
+
+            if extendedCounter == 5:
                 pyautogui.click()
+
 
 def main():
     listener = SampleListener()
