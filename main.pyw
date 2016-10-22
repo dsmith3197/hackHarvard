@@ -49,6 +49,29 @@ class PointerListener(Leap.Listener):
                 yRadius = 80
                 pyautogui.moveTo((hand_center.x + xRadius) * screenWidth / (2 * xRadius), screenHeight - (hand_center.y - 150) * screenHeight / (2 * yRadius))
 
+
+            # Click functionality
+            fingers = hand.fingers
+            extended = 0
+            for finger in fingers:
+                if finger.is_extended:
+                    extended += 1
+            if (extended == 5 and prevFingers == 5 and hand.confidence > .9):
+                pyautogui.click()
+                time.sleep(.5)
+
+            elif (extended == 3 and prevFingers == 3 and hand.confidence > .9):
+                pyautogui.click(button="right")
+                time.sleep(.5)
+
+            prevFingers = extended
+            #print('Fingers:' + str(extended) + ' Confidence: ' + str(hand.confidence))
+
+            if (extended < 1):
+                xRadius = 100
+                yRadius = 80
+                pyautogui.moveTo((hand_center.x + xRadius) * screenWidth / (2 * xRadius), screenHeight - (hand_center.y - 150) * screenHeight / (2 * yRadius))
+
             # scrolling functionality
             gestures = frame.gestures()
             for gesture in gestures:
