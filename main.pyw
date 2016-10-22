@@ -11,8 +11,8 @@ import pyautogui
 
 screenWidth, screenHeight = pyautogui.size()
 
-timeMax = 5
-timeout = timeMax
+
+prevFingers = 0
 
 class PointerListener(Leap.Listener):
 
@@ -21,34 +21,33 @@ class PointerListener(Leap.Listener):
 
     def on_frame(self, controller):
         frame = controller.frame()
-        global timeout, timeMax
+        global prevFingers
         hands = frame.hands
         if(hands):
             hand = hands[0]
             hand_center = hand.stabilized_palm_position
-            xRadius = 100
-            yRadius = 80
-            pyautogui.moveTo((hand_center.x + xRadius) * screenWidth / (2 * xRadius), screenHeight - (hand_center.y - 150) * screenHeight / (2 * yRadius))
 
-            # if (len(hands) == 2):
-            #     pyautogui.mouseDown()
-            #
-            # else:
-            #     pyautogui.mouseUp()
+            # Click functionality
+            fingers = hand.fingers
+            extended = 0
+            for finger in fingers:
+                if finger.is_extended:
+                    extended += 1
+            if (extended == 5 and prevFingers == 5 and hand.confidence > .9):
+                pyautogui.click()
+                time.sleep(.5)
 
+            elif (extended == 3 and prevFingers == 3 and hand.confidence > .9):
+                pyautogui.click(button="right")
+                time.sleep(.5)
 
-            #checking for clicking if all fingers are extended
-            # fingers = hand.fingers
-            # if fingers:
-            #     print(fingers.length)
-            # extendedCounter = 0
-            #
-            # for x in fingers:
-            #     if x.extended():
-            #         extendedCounter += 1
-            #
-            # if extendedCounter == 5:
-            #     pyautogui.click()
+            prevFingers = extended
+            #print('Fingers:' + str(extended) + ' Confidence: ' + str(hand.confidence))
+
+            if (extended < 1):
+                xRadius = 100
+                yRadius = 80
+                pyautogui.moveTo((hand_center.x + xRadius) * screenWidth / (2 * xRadius), screenHeight - (hand_center.y - 150) * screenHeight / (2 * yRadius))
 
 
 
@@ -56,6 +55,7 @@ class PointerListener(Leap.Listener):
 def main():
     listener = PointerListener()
     controller = Leap.Controller()
+    controller.set_policy(Leap.Controller.POLICY_BACKGROUND_FRAMES)
     controller.add_listener(listener)
     pyautogui.FAILSAFE = False
 
